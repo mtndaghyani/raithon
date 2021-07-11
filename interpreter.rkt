@@ -20,7 +20,7 @@
 
 (define (get-store) the-store)
 
-(define (initialize-store)
+(define (initialize-store!)
   (set! the-store (empty-store)))
 
 (define (new-ref val)
@@ -42,4 +42,11 @@
                                (car store1)
                                (setref-inner (cdr store1) (- ref1 1)))]))))
           (setref-inner the-store ref))))
-  
+
+;value-of function
+(define (value-of-program pgm)
+  (initialize-store!)
+  (value-of pgm (empty-env)))
+
+(define (value-of exp)
+  '())
