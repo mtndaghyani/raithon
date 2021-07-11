@@ -68,6 +68,12 @@
 ;determines the value of a single statement
 ;TODO
 (define (value-of-statement exp env)
+  (let ((exp-type (car exp)))
+    (cond
+      [(equal? exp-type 'assign) (assign exp env)]
+      [else exp])))
+
+(define (assign exp env)
   exp)
   
 
