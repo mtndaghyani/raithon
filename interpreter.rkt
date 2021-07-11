@@ -73,8 +73,13 @@
       [(equal? exp-type 'assign) (assign exp env)]
       [else exp])))
 
+;value of assign expression
 (define (assign exp env)
-  exp)
+  (let ((ref (new-ref (cadr (caddr exp)))))
+    (let ((var (cadr exp)))
+      (extend-env var ref env))))
+
+
   
 
 
