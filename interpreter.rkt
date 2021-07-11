@@ -49,5 +49,26 @@
   (value-of (parse pgm) (empty-env)))
 
 (define (value-of exp env)
-  '())
+  (cond
+    [(and (list-of-statements? exp) (= (length exp) 1))
+     (value-of (car exp) env)]
+    [(list-of-statements? exp)
+     (let ((new-env (value-of (car exp) env)))
+       (value-of (cdr exp) new-env))]
+    [else (value-of-statement exp env)]))
+
+;determines if exp is a list of statements or a statement itself
+(define (list-of-statements? exp)
+  (if (null? exp)
+      true
+      (and
+       (list? (car exp))
+       (list-of-statements? (cdr exp)))))
+
+;determines the value of a single statement
+;TODO
+(define (value-of-statement exp env)
+  exp)
+  
+
 
