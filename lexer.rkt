@@ -1,6 +1,5 @@
 #lang racket
-
-
+(provide (all-defined-out))
 
 (require parser-tools/lex
          (prefix-in : parser-tools/lex-sre)
@@ -57,10 +56,10 @@
 
 
 
-
 ;test
+#|
 (define lex-this (lambda (lexer input) (lambda () (lexer input))))
-(define my-lexer (lex-this raithon-lexer (open-input-string "for i in [1, 2, 3]:\n global x; if i > 2: x = x + i; else x = x - i;")))
+(define my-lexer (lex-this raithon-lexer (open-input-string "a = 12; if a > 2: return 0;")))
 
 
 
@@ -108,4 +107,4 @@
 (my-lexer)
 (my-lexer)
 (my-lexer)
-
+|#
