@@ -1,4 +1,7 @@
 #lang racket
+
+(provide parse)
+
 (require "lexer.rkt")
 
 (require parser-tools/lex
@@ -85,7 +88,19 @@
              )))
 
 ;test
-(define lex-this (lambda (lexer input) (lambda () (lexer input))))
-(define my-lexer (lex-this raithon-lexer (open-input-string "global x; pass; break; continue; if x == 2: return 0; else: return 1;; a = b or c and 2 + 3 ** 4 - 1 > 0;")))
-(let ((parser-res (raithon-parser my-lexer))) parser-res)
+(define lex-this
+  (lambda (lexer input)
+    (lambda ()
+      (lexer input))))
 
+(define (my-lexer pmg-as-string)
+  (lex-this
+   raithon-lexer
+   (open-input-string
+    pmg-as-string)))
+
+(define (parse pmg-as-string)
+  (raithon-parser
+   (my-lexer pmg-as-string)))
+;(raithon-parser
+; (my-lexer "global x; pass; break; continue; if x == 2: return 0; else: return 1;; a = b or c and 2 + 3 ** 4 - 1 > 0;"))

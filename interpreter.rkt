@@ -46,7 +46,8 @@
 ;value-of function
 (define (value-of-program pgm)
   (initialize-store!)
-  (value-of pgm (empty-env)))
+  (value-of (parse pgm) (empty-env)))
 
-(define (value-of exp)
+(define (value-of exp env)
   '())
+
