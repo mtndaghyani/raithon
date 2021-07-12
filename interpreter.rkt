@@ -8,12 +8,6 @@
 (define (extend-env var ref env)
   (cons var (cons ref env)))
 
-(define (extend-env* vars refs env)
-  (if (empty? vars)
-      env
-      (extend-env* (cdr vars) (cdr refs)
-                   (extend-env (car vars) (car refs)))))
-
 (define (apply-env var env)
   (if (equal? var (car env))
       (cadr env)
@@ -49,22 +43,6 @@
                                (setref-inner (cdr store1) (- ref1 1)))]))))
           (setref-inner the-store ref))))
 
-; functions related to proc
-
-(define proc?
-  (lambda (val)
-    (procedure? val)))
-
-(define procedure
-  (lambda (vars stmts env)
-    (lambda (refs)
-      (value-of stmts (extend-env* vars refs env)))))
-
-(define apply-procedure
-  (lambda (proc1 val)
-    (proc1 val)))
-
-
 ;value-of function
 (define (value-of-program pgm)
   (initialize-store!)
@@ -97,6 +75,7 @@
       [(equal? exp-type 'if) (if-exp exp env)]
       [(equal? exp-type 'for) (for-exp exp env)]
       [(equal? exp-type 'list) (list env exp)]
+      [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
@@ -184,3 +163,14 @@
                               (- (length the-store) 1)
                               env))
         (parsed-for-exp var (cdr py-list) statements env))))
+
+;gives the value of a variable
+(define (var exp env)
+  (let ((val (deref (apply-env (cadr exp) env))))
+    (cond
+      [(number? val) (list 'num val)]
+      [(list? val) (list 'list val)]
+      [(equal? #t val) (list 'true)]
+      [(equal? #f val) (list 'false)]
+      [else (list 'None)])))
+      
