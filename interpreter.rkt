@@ -3,6 +3,7 @@
 (require "parser.rkt")
 
 ;functions relating to environment
+#|
 (define (empty-env) '())
 
 (define (extend-env var ref env)
@@ -18,6 +19,53 @@
   (if (equal? var (car env))
       (cadr env)
       (apply-env var (cddr env))))
+|#
+
+;another environment implementation
+(define empty-env
+  (lambda () (list 'empty-env)))
+
+(define extend-env
+  (lambda (var ref env)
+    (list 'extend-env var ref env)))
+
+(define extend-env-rec
+  (lambda (pname vars body env)
+    (list 'extend-env-rec pname vars body env)))
+
+(define (extend-env* vars refs env)
+  (if (empty? vars)
+      env
+      (extend-env* (cdr vars) (cdr refs)
+                   (extend-env (car vars) (car refs) env))))
+(define apply-env
+  (lambda (env search-var)
+    (cond
+      ((eqv? (car env) 'empty-env)
+       (report-no-binding-found search-var))
+      ((eqv? (car env) 'extend-env)
+       (let ((saved-var (cadr env))
+             (saved-val (caddr env))
+             (saved-env (cadddr env)))
+         (if (eqv? search-var saved-var)
+             saved-val
+             (apply-env saved-env search-var))))
+      ((eqv? (car env) 'extend-env-rec)
+       (let ((pname (cadr env))
+             (vars (caddr env))
+             (body (cadddr env))
+             (saved-env (cadr (cdddr env))))
+         (if (eqv? search-var pname)
+             (new-ref (procedure vars body env))
+             (apply-env saved-env search-var))))       
+      (else
+       (report-invalid-env env)))))
+(define report-no-binding-found
+  (lambda (search-var)
+    (display "No binding")))
+(define report-invalid-env
+  (lambda (env)
+    (display "Bad environment")))
 
 ;functions relating to store
 (define (empty-store) '())
@@ -96,10 +144,11 @@
       [(equal? exp-type 'print) (my-print (cadr exp) env)]
       [(equal? exp-type 'if) (if-exp exp env)]
       [(equal? exp-type 'for) (for-exp exp env)]
+      [(equal? exp-type 'proc) (def-exp exp env)]
       [(equal? exp-type 'list) (list env exp)]
       [(equal? exp-type 'none) (list env 'None)]
-      [(equal? exp-type 'true) (list env #t)]
-      [(equal? exp-type 'false) (list env #f)]
+      [(equal? exp-type 'true) (list env 'True)]
+      [(equal? exp-type 'false) (list env 'False)]
       [else exp])))
 
 
@@ -156,8 +205,8 @@
 (define (if-exp exp env)
   (let ((e1 (value-of (cadr exp) env)))
     (cond
-      [(or (equal? (cadr e1) #f) (equal? (cadr e1) null)) (value-of (cadddr exp) (car e1))]
-      [(equal? (cadr e1) #t) (value-of (caddr exp) (car e1))])))
+      [(or (equal? (cadr e1) 'False) (equal? (cadr e1) null)) (value-of (cadddr exp) (car e1))]
+      [(equal? (cadr e1) 'True) (value-of (caddr exp) (car e1))])))
 
 
 ;test
@@ -184,3 +233,13 @@
                               (- (length the-store) 1)
                               env))
         (parsed-for-exp var (cdr py-list) statements env))))
+
+;def expression for defining a function
+(define (def-exp exp env)
+  (let ((pname (cadr exp))
+        (vars (caddr exp))
+        (stmts (cadddr exp)))
+    (list (extend-env-rec pname vars stmts env) 'None)))
+
+;(define a "a=1;")
+;(value-of-program a)
