@@ -93,9 +93,11 @@
   (let ((exp-type (car exp)))
     (cond
       [(equal? exp-type 'assign) (assign exp env)]
-      [(equal? exp-type 'print) (my-print exp env)]
+      [(equal? exp-type 'print) (my-print (cadr exp) env)]
       [(equal? exp-type 'if) (if-exp exp env)]
-      [(equal? exp-type 'none) (list env null)]
+      [(equal? exp-type 'for) (for-exp exp env)]
+      [(equal? exp-type 'list) (list env exp)]
+      [(equal? exp-type 'none) (list env 'None)]
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
       [else exp])))
@@ -109,26 +111,46 @@
        (extend-env var ref env)
        (list 'None)))))
 
-;print function 
-(define (my-print exp env) 
-  (let ((exp-type (caadr exp))) 
-    (let ((msg 
-           (cond 
-             [(equal? exp-type 'list) (print-list (cadr exp))] 
-             [(equal? exp-type 'true) 'True] 
-             [(equal? exp-type 'false) 'False] 
-             [(equal? exp-type 'none) 'None] 
-             [(equal? exp-type 'num) (cadr exp)] 
-             [else (deref (apply-env (cadr exp) env))]))) 
-      (begin 
-        (print msg) 
-        (display "\n") 
-        (cons env (list 'None)))))) 
 
+;print function 
+(define (my-print exp env)
+  (let ((msg (get-content exp env)))
+    (if (void? msg)
+        (cons env (list 'None))
+        (begin
+          (print msg)
+          (display "\n")
+          (cons env (list 'None))))))
+
+;extracts the printable content of an abstact syntax object
+(define (get-content exp env)
+  (let ((exp-type (car exp)))
+    (cond
+      [(equal? exp-type 'list) (print-list (cadr exp) env)]
+      [(equal? exp-type 'true) 'True]
+      [(equal? exp-type 'false) 'False]
+      [(equal? exp-type 'none) 'None]
+      [(equal? exp-type 'num) (cadr exp)]
+      [else (deref (apply-env (cadr exp) env))])))
   
 ;prints a list 
-(define (print-list l) 
-  exp)
+(define (print-list list env) 
+  (begin
+    (display "[")
+    (print-items list env)
+    (display "\n")))
+
+;creates items of list
+(define (print-items list env)
+  (if (= (length list) 1)
+      (begin
+        (display (get-content (car list) env))
+        (display "]"))
+      (begin
+        (display (get-content (car list) env))
+        (display ", ")
+        (print-items (cdr list) env))))
+      
 
 ;value of if expression
 (define (if-exp exp env)
@@ -141,3 +163,24 @@
 ;test
 ;(define a (car (parse "if True: return 2; else: return 0;;")))
 ;(value-of a (empty-env))
+
+;for expression
+(define (for-exp exp env)
+  (let ((var (cadr exp))
+        (py-list (cadr
+                  (cadr
+                   (value-of (caddr exp) env))))
+        (statements (cadddr exp)))
+    (parsed-for-exp var py-list statements env)))
+
+;for expression after extracting datat from abstract syntax
+(define (parsed-for-exp var py-list statements env)
+  (if (null? py-list)
+      (list env 'None)
+      (begin
+        (new-ref (value-of (car py-list) env))
+        (value-of statements (extend-env
+                              var
+                              (- (length the-store) 1)
+                              env))
+        (parsed-for-exp var (cdr py-list) statements env))))
