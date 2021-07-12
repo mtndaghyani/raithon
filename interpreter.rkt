@@ -89,25 +89,42 @@
 
 
 ;print function 
-(define (my-print exp env) 
-  (let ((exp-type (car exp))) 
-    (let ((msg 
-           (cond 
-             [(equal? exp-type 'list) (print-list (cadr exp))] 
-             [(equal? exp-type 'true) 'True] 
-             [(equal? exp-type 'false) 'False] 
-             [(equal? exp-type 'none) 'None] 
-             [(equal? exp-type 'num) (cadr exp)] 
-             [else (deref (apply-env (cadr exp) env))]))) 
-      (begin 
-        (print msg) 
-        (display "\n") 
-        (cons env (list 'None)))))) 
+(define (my-print exp env)
+  (let ((msg (get-content exp env)))
+    (begin
+      (print msg)
+      (display "\n")
+      (cons env (list 'None)))))
 
+;extracts the printable content of an abstact syntax object
+(define (get-content exp env)
+  (let ((exp-type (car exp)))
+    (cond
+      [(equal? exp-type 'list) (print-list (cadr exp) env)]
+      [(equal? exp-type 'true) 'True]
+      [(equal? exp-type 'false) 'False]
+      [(equal? exp-type 'none) 'None]
+      [(equal? exp-type 'num) (cadr exp)]
+      [else (deref (apply-env (cadr exp) env))])))
   
 ;prints a list 
-(define (print-list l) 
-  exp)
+(define (print-list list env) 
+  (begin
+    (display "[")
+    (print-items list env)
+    (display "\n")))
+
+;creates items of list
+(define (print-items list env)
+  (if (= (length list) 1)
+      (begin
+        (display (get-content (car list) env))
+        (display "]"))
+      (begin
+        (display (get-content (car list) env))
+        (display ", ")
+        (print-items (cdr list) env))))
+      
 
 ;value of if expression
 (define (if-exp exp env)
