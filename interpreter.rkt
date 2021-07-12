@@ -71,9 +71,9 @@
   (let ((exp-type (car exp)))
     (cond
       [(equal? exp-type 'assign) (assign exp env)]
-      [(equal? exp-type 'print) (my-print exp env)]
+      [(equal? exp-type 'print) (my-print (cadr exp) env)]
       [(equal? exp-type 'if) (if-exp exp env)]
-      [(equal? exp-type 'none) (list env null)]
+      [(equal? exp-type 'none) (list env 'None)]
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
       [else exp])))
@@ -90,7 +90,7 @@
 
 ;print function 
 (define (my-print exp env) 
-  (let ((exp-type (caadr exp))) 
+  (let ((exp-type (car exp))) 
     (let ((msg 
            (cond 
              [(equal? exp-type 'list) (print-list (cadr exp))] 
