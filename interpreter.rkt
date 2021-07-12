@@ -71,15 +71,15 @@
   (let ((exp-type (car exp)))
     (cond
       [(equal? exp-type 'assign) (assign exp env)]
+      [(equal? exp-type 'if) (if-exp exp env)]
       [else exp])))
 
 ;value of assign expression
 (define (assign exp env)
-  (let ((ref (new-ref (cadr (caddr exp)))))
+  (let ((ref (new-ref (value-of (caddr exp) env))))
     (let ((var (cadr exp)))
       (extend-env var ref env))))
 
-
-  
-
-
+;value of if expression
+(define (if-exp exp env)
+  (exp))
