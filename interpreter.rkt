@@ -52,8 +52,8 @@
   (cond
     [(and (list-of-statements? exp) (= (length exp) 1))
      (value-of (car exp) env)]
-    [(and (list-of-statements? exp) (equal? (caar exp) 'assign))
-     (let ((new-env (value-of (car exp) env)))
+    [(list-of-statements? exp)
+     (let ((new-env (car (value-of (car exp) env))))
        (value-of (cdr exp) new-env))]
     [else (value-of-statement exp env)]))
 
@@ -78,7 +78,9 @@
 (define (assign exp env)
   (let ((ref (new-ref (value-of (caddr exp) env))))
     (let ((var (cadr exp)))
-      (extend-env var ref env))))
+      (cons
+       (extend-env var ref env)
+       (list 'None)))))
 
 ;value of if expression
 (define (if-exp exp env)
