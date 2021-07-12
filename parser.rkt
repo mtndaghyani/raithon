@@ -21,6 +21,7 @@
              (stmt ((compound_stmt) $1)
                    ((simple_stmt) $1))
              (simple_stmt ((assignment) $1)
+                          ((print) $1)
                           ((return_stmt) $1)
                           ((global_stmt) $1)
                           ((PASS) (list 'pass))
@@ -84,6 +85,7 @@
                   ((LSQB RSQB) (list 'list '())))
              (expressions ((expression) (list $1))
                           ((expression COMMA expressions) (cons $1 $3)))
+             (print ((PRINT LPAR atom RPAR) (list 'print $3)))
              
              )))
 
@@ -103,4 +105,4 @@
   (raithon-parser
    (my-lexer pmg-as-string)))
 ;(raithon-parser
- ;(my-lexer "x = [1, 2, 3];"))
+;(my-lexer "a = 2; print([2, x]);"))

@@ -34,6 +34,7 @@
             ("True" (token-TRUE))
             ("False" (token-FALSE))
             ("None" (token-NONE))
+            ("print" (token-PRINT))
             (";" (token-SEMI))
             ("(" (token-LPAR))
             (")" (token-RPAR))
@@ -49,7 +50,7 @@
 (define-empty-tokens operators (EQUAL EQEQUAL LESS MORE PLUS MINUS STAR SLASH DOUBLESTAR))
 (define-empty-tokens keywords (PASS BREAK CONTINUE RETURN
                                GLOBAL DEF IF ELSE FOR IN
-                               OR AND NOT TRUE FALSE NONE))
+                               OR AND NOT TRUE FALSE NONE PRINT))
 (define-empty-tokens seperators (EOF SEMI LPAR RPAR COLON COMMA LSQB RSQB))
 
 
