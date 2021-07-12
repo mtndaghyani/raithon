@@ -72,6 +72,9 @@
     (cond
       [(equal? exp-type 'assign) (assign exp env)]
       [(equal? exp-type 'if) (if-exp exp env)]
+      [(equal? exp-type 'none) (list env null)]
+      [(equal? exp-type 'true) (list env #t)]
+      [(equal? exp-type 'false) (list env #f)]
       [else exp])))
 
 ;value of assign expression
@@ -84,4 +87,12 @@
 
 ;value of if expression
 (define (if-exp exp env)
-  (exp))
+  (let ((e1 (value-of (cadr exp) env)))
+    (cond
+      [(or (equal? (cadr e1) #f) (equal? (cadr e1) null)) (value-of (cadddr exp) (car e1))]
+      [(equal? (cadr e1) #t) (value-of (caddr exp) (car e1))])))
+
+
+;test
+;(define a (car (parse "if True: return 2; else: return 0;;")))
+;(value-of a (empty-env))
