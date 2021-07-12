@@ -31,35 +31,43 @@
   (if (empty? vars)
       env
       (extend-env* (cdr vars) (cdr refs)
-                   (extend-env (car vars) (car refs) env))))
+                   (extend-env (cadr (car vars)) (car refs) env))))
 (define apply-env
   (lambda (env search-var)
     (cond
-      ((eqv? (car env) 'empty-env)
+      ((equal? (car env) 'empty-env)
        (report-no-binding-found search-var))
-      ((eqv? (car env) 'extend-env)
+      ((equal? (car env) 'extend-env)
        (let ((saved-var (cadr env))
              (saved-ref (caddr env))
              (saved-env (cadddr env)))
-         (if (eqv? search-var saved-var)
+         (if (equal? search-var saved-var)
              saved-ref
              (apply-env saved-env search-var))))
-      ((eqv? (car env) 'extend-env-rec)
+      ((equal? (car env) 'extend-env-rec)
        (let ((pname (cadr env))
              (vars (caddr env))
              (body (cadddr env))
              (saved-env (cadr (cdddr env))))
-         (if (eqv? search-var pname)
+         (if (equal? search-var pname)
              (new-ref (procedure vars body env))
              (apply-env saved-env search-var))))       
       (else
        (report-invalid-env env)))))
 (define report-no-binding-found
   (lambda (search-var)
-    (display "No binding")))
+    (display "No Binding")))
 (define report-invalid-env
   (lambda (env)
     (display "Bad environment")))
+
+;get function's default parameters from its name
+(define (find-params pname env)
+
+         
+          (if (equal? (cadr env) pname)
+      (caddr env)
+      (find-params pname (cadr (cdddr env)))))
 
 ;functions relating to store
 (define (empty-store) '())
@@ -102,8 +110,8 @@
       (value-of stmts (extend-env* vars refs env)))))
 
 (define apply-procedure
-  (lambda (proc1 val)
-    (proc1 val)))
+  (lambda (proc1 refs)
+    (proc1 refs)))
 
 ;value-of function
 (define (value-of-program pgm)
@@ -135,6 +143,7 @@
       [(equal? exp-type 'assign) (assign exp env)]
       [(equal? exp-type 'print) (my-print (cadr exp) env)]
       [(equal? exp-type 'if) (if-exp exp env)]
+      [(equal? exp-type 'call) (call-exp exp env)]
       [(equal? exp-type 'for) (for-exp exp env)]
       [(equal? exp-type 'proc) (def-exp exp env)]
       [(equal? exp-type 'list) (list env exp)]
@@ -145,6 +154,7 @@
       [(equal? exp-type 'plus) (plus exp env)]
       [(equal? exp-type 'true) (list env 'True)]
       [(equal? exp-type 'false) (list env 'False)]
+      [(equal? exp-type 'return) (return-exp exp env)]
       [else exp])))
 
 
@@ -176,7 +186,7 @@
       [(equal? exp-type 'false) 'False]
       [(equal? exp-type 'none) 'None]
       [(equal? exp-type 'num) (cadr exp)]
-      [else (deref (apply-env (cadr exp) env))])))
+      [else (deref (apply-env env (cadr exp) ))])))
   
 ;prints a list 
 (define (print-list list env) 
@@ -229,16 +239,50 @@
                               env))
         (parsed-for-exp var (cdr py-list) statements env))))
 
-;def expression for defining a function
+;def statement for defining a function
 (define (def-exp exp env)
   (let ((pname (cadr exp))
         (vars (caddr exp))
         (stmts (cadddr exp)))
     (list (extend-env-rec pname vars stmts env) 'None)))
 
+; call expression 
+(define (call-exp exp env)
+  (let ((pname (cadr (cadr exp)))
+        (arg-values (get-arguments (caddr exp) env)))
+    (let ((proc (apply-env env pname)))
+              (let ((refs (get-refs (find-params pname env) arg-values)))
+                (apply-procedure (deref proc) refs)))))
+
+;input: list of expressions
+;ouput: list of values
+(define (get-arguments arguments env)
+  (if (empty? arguments)
+      '()
+      (let ((e (value-of (car arguments) env)))
+        (cons (cadr e) (get-arguments (cdr arguments) env)))))
+
+;input: env * list of values
+;ouput: list of values
+
+(define (get-refs params arg-values)
+    (if (empty? params)
+        '()
+        (if (empty? arg-values)
+        (let ((id (cadr (car params)))
+          (val (cadr (value-of (caddr (car params))))))
+          (cons (new-ref val) (get-refs (cdr params) (cdr arg-values))))
+        (let ((id (cadr (car params)))
+              (val (car arg-values)))
+          (cons (new-ref val) (get-refs (cdr params) (cdr arg-values)))
+          ))))
+
+(define (return-exp exp env)
+  (value-of (cadr exp) env))
+
 ;gives the value of a variable
 (define (var exp env)
-  (let ((val (deref (apply-env (cadr exp) env))))
+  (let ((val (deref (apply-env env (cadr exp) ))))
     (cond
       [(number? val) (list 'num val)]
       [(list? val) (list 'list val)]
@@ -261,5 +305,5 @@
   (list 'num num))
 
 ;test
-;(define a (car (parse "if True: print(23); else: print(23);;")))
-;(value-of-statement a (empty-env))
+;(define a "def g(y=1): return y;; def f(x=2): b = 12; return b;; a = g(6); b = f(8); print(a);")
+;(value-of-program a)
