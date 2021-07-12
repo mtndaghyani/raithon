@@ -140,8 +140,14 @@
       [(equal? exp-type 'list) (list env exp)]
       [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
+<<<<<<< HEAD
+      [(equal? exp-type 'true) (list env #t)]
+      [(equal? exp-type 'false) (list env #f)]
+      [(equal? exp-type 'plus) (plus exp env)]
+=======
       [(equal? exp-type 'true) (list env 'True)]
       [(equal? exp-type 'false) (list env 'False)]
+>>>>>>> c6d9f8a97364b0fad2fbb1f967e5b16665d82c3b
       [else exp])))
 
 
@@ -243,6 +249,18 @@
       [(equal? #t val) (list 'true)]
       [(equal? #f val) (list 'false)]
       [else (list 'None)])))
+
+;adds two numbers together
+(define (plus exp env)
+  (let ((num1 (expval->num (value-of (cadr exp) env)))
+        (num2 (expval->num (value-of (caddr exp) env))))
+    (num-val (+ num1 num2))))
+
+;provides value of number in racket form
+(define (expval->num exp)
+  (cadr exp))
+
+;provides number in python
+(define (num-val num)
+  (list 'num num))
       
-(define a "a=2;")
-(value-of-program a)
