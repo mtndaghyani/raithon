@@ -39,10 +39,10 @@
        (report-no-binding-found search-var))
       ((eqv? (car env) 'extend-env)
        (let ((saved-var (cadr env))
-             (saved-val (caddr env))
+             (saved-ref (caddr env))
              (saved-env (cadddr env)))
          (if (eqv? search-var saved-var)
-             saved-val
+             saved-ref
              (apply-env saved-env search-var))))
       ((eqv? (car env) 'extend-env-rec)
        (let ((pname (cadr env))
@@ -90,6 +90,20 @@
                                (car store1)
                                (setref-inner (cdr store1) (- ref1 1)))]))))
           (setref-inner the-store ref))))
+; functions related to proc
+
+(define proc?
+  (lambda (val)
+    (procedure? val)))
+
+(define procedure
+  (lambda (vars stmts env)
+    (lambda (refs)
+      (value-of stmts (extend-env* vars refs env)))))
+
+(define apply-procedure
+  (lambda (proc1 val)
+    (proc1 val)))
 
 ;value-of function
 (define (value-of-program pgm)
@@ -230,3 +244,5 @@
       [(equal? #f val) (list 'false)]
       [else (list 'None)])))
       
+(define a "a=2;")
+(value-of-program a)
