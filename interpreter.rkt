@@ -140,14 +140,11 @@
       [(equal? exp-type 'list) (list env exp)]
       [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
-<<<<<<< HEAD
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
       [(equal? exp-type 'plus) (plus exp env)]
-=======
       [(equal? exp-type 'true) (list env 'True)]
       [(equal? exp-type 'false) (list env 'False)]
->>>>>>> c6d9f8a97364b0fad2fbb1f967e5b16665d82c3b
       [else exp])))
 
 
