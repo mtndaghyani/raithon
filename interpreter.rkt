@@ -76,7 +76,7 @@
 
 ;value of assign expression
 (define (assign exp env)
-  (let ((ref (new-ref (value-of (caddr exp) env))))
+  (let ((ref (new-ref (cadr (value-of (caddr exp) env)))))
     (let ((var (cadr exp)))
       (cons
        (extend-env var ref env)
