@@ -157,7 +157,7 @@
   (if (null? py-list)
       (list env 'None)
       (begin
-        (new-ref (value-of (car py-list) env))
+        (new-ref (cadr (value-of (car py-list) env)))
         (value-of statements (extend-env
                               var
                               (- (length the-store) 1)
