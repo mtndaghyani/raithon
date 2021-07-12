@@ -140,8 +140,8 @@
       [(equal? exp-type 'list) (list env exp)]
       [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
-      [(equal? exp-type 'true) (list env #t)]
-      [(equal? exp-type 'false) (list env #f)]
+      [(equal? exp-type 'true) (list env 'True)]
+      [(equal? exp-type 'false) (list env 'False)]
       [(equal? exp-type 'plus) (plus exp env)]
       [(equal? exp-type 'true) (list env 'True)]
       [(equal? exp-type 'false) (list env 'False)]
@@ -205,9 +205,8 @@
       [(equal? (cadr e1) 'True) (value-of (caddr exp) (car e1))])))
 
 
-;test
-;(define a (car (parse "if True: return 2; else: return 0;;")))
-;(value-of a (empty-env))
+
+
 
 ;for expression
 (define (for-exp exp env)
@@ -260,4 +259,7 @@
 ;provides number in python
 (define (num-val num)
   (list 'num num))
-      
+
+;test
+;(define a (car (parse "if True: print(23); else: print(23);;")))
+;(value-of-statement a (empty-env))
