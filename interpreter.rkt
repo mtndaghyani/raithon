@@ -8,6 +8,12 @@
 (define (extend-env var ref env)
   (cons var (cons ref env)))
 
+(define (extend-env* vars refs env)
+  (if (empty? vars)
+      env
+      (extend-env* (cdr vars) (cdr refs)
+                   (extend-env (car vars) (car refs)))))
+
 (define (apply-env var env)
   (if (equal? var (car env))
       (cadr env)
@@ -42,6 +48,22 @@
                                (car store1)
                                (setref-inner (cdr store1) (- ref1 1)))]))))
           (setref-inner the-store ref))))
+
+; functions related to proc
+
+(define proc?
+  (lambda (val)
+    (procedure? val)))
+
+(define procedure
+  (lambda (vars stmts env)
+    (lambda (refs)
+      (value-of stmts (extend-env* vars refs env)))))
+
+(define apply-procedure
+  (lambda (proc1 val)
+    (proc1 val)))
+
 
 ;value-of function
 (define (value-of-program pgm)
