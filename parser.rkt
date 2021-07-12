@@ -80,7 +80,7 @@
                    ((NONE) (list 'none))
                    ((NUMBER) (list 'num $1))
                    ((lst) $1))
-             (lst ((LSQB expressions RSQB) ((list 'list $2)))
+             (lst ((LSQB expressions RSQB) (list 'list $2))
                   ((LSQB RSQB) (list 'list '())))
              (expressions ((expression) (list $1))
                           ((expression COMMA expressions) (cons $1 $3)))
@@ -103,4 +103,4 @@
   (raithon-parser
    (my-lexer pmg-as-string)))
 ;(raithon-parser
-; (my-lexer "global x; pass; break; continue; if x == 2: return 0; else: return 1;; a = b or c and 2 + 3 ** 4 - 1 > 0;"))
+ ;(my-lexer "x = [1, 2, 3];"))
