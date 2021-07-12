@@ -52,7 +52,7 @@
   (cond
     [(and (list-of-statements? exp) (= (length exp) 1))
      (value-of (car exp) env)]
-    [(list-of-statements? exp)
+    [(and (list-of-statements? exp) (equal? (caar exp) 'assign))
      (let ((new-env (value-of (car exp) env)))
        (value-of (cdr exp) new-env))]
     [else (value-of-statement exp env)]))
