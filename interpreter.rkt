@@ -71,11 +71,13 @@
   (let ((exp-type (car exp)))
     (cond
       [(equal? exp-type 'assign) (assign exp env)]
+      [(equal? exp-type 'print) (my-print exp env)]
       [(equal? exp-type 'if) (if-exp exp env)]
       [(equal? exp-type 'none) (list env null)]
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
       [else exp])))
+
 
 ;value of assign expression
 (define (assign exp env)
@@ -84,6 +86,27 @@
       (cons
        (extend-env var ref env)
        (list 'None)))))
+
+;print function 
+(define (my-print exp env) 
+  (let ((exp-type (caadr exp))) 
+    (let ((msg 
+           (cond 
+             [(equal? exp-type 'list) (print-list (cadr exp))] 
+             [(equal? exp-type 'true) 'True] 
+             [(equal? exp-type 'false) 'False] 
+             [(equal? exp-type 'none) 'None] 
+             [(equal? exp-type 'num) (cadr exp)] 
+             [else (deref (apply-env (cadr exp) env))]))) 
+      (begin 
+        (print msg) 
+        (display "\n") 
+        (cons env (list 'None)))))) 
+
+  
+;prints a list 
+(define (print-list l) 
+  exp)
 
 ;value of if expression
 (define (if-exp exp env)
