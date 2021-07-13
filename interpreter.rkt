@@ -315,8 +315,8 @@
     (cond
       [(number? val) (list 'num val)]
       [(list? val) (list 'list val)]
-      [(equal? #t val) (list 'true)]
-      [(equal? #f val) (list 'false)]
+      [(equal? 'True val) (list env 'True)]    ;??????????????????????
+      [(equal? 'False val) (list env 'False)]  ;??????????????????????
       [else (list 'None)])))
 
 ;adds two numbers together
@@ -334,6 +334,6 @@
   (list 'num num))
 
 ;test
-;(define a "o=4; def g(): global o; o = o + 1; return 0;; def f(x=2, y=9): global o; o = o + 2; return o;; a = g() + f(3); print(a); print(o);")
+;(define a "def f(x=False): if x: return 0; else: return f(True);;; a = f(); print(a);")
 ;(define b "a = 1; a=2; a=3; a=4;")
 ;(value-of-program a)
