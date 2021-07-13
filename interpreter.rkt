@@ -63,11 +63,11 @@
 
 ;get function's default parameters from its name
 (define (find-params pname env)
-
-         
-          (if (equal? (cadr env) pname)
-      (caddr env)
-      (find-params pname (cadr (cdddr env)))))
+  (if (not (equal? (car env) 'extend-env-rec))
+      (find-params pname (cadddr env))
+      (if (equal? (cadr env) pname)
+              (caddr env)
+              (find-params pname (cadr (cdddr env))))))
 
 ;functions relating to store
 (define (empty-store) '())
@@ -305,5 +305,5 @@
   (list 'num num))
 
 ;test
-;(define a "def g(y=1): return y;; def f(x=2): b = 12; return b;; a = g(6); b = f(8); print(a);")
-;(value-of-program a)
+(define a "x=4; def g(y=1): return y;; def f(x=2): b = g(x); return b;; a = f(); print(a);")
+(value-of-program a)
