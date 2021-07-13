@@ -305,5 +305,5 @@
   (list 'num num))
 
 ;test
-(define a "x=4; def g(y=1): return y;; def f(x=2, y=9.3): b = g(x); return y;; a = f(2); print(a);")
-(value-of-program a)
+;(define a "x=4; def g(y=1): return y;; def f(x=2, y=9): b = g(x); return b;; a = f(x); print(a);")
+;(value-of-program a)
