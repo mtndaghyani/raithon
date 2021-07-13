@@ -32,6 +32,22 @@
       env
       (extend-env* (cdr vars) (cdr refs)
                    (extend-env (cadr (car vars)) (car refs) env))))
+;indicates that id is a global variable
+(define (extend-global id env)
+  (list 'extend-global id 99 env))
+
+;checks if id is global
+(define (global? id env)
+  (cond
+    [(equal? (car env) 'empty-env) #f]
+    [(equal? (car env) 'extend-global)
+             (if (equal? (cadr env) id)
+                 #t
+                 (global? id (cadddr env)))]
+    [(equal? (car env) 'extend-env-rec) (global? id (cadr (cdddr env)))]
+    [else (global? id (cadddr env))]))
+
+
 (define apply-env
   (lambda (env search-var)
     (cond
@@ -44,6 +60,7 @@
          (if (equal? search-var saved-var)
              saved-ref
              (apply-env saved-env search-var))))
+      ((equal? (car env) 'extend-global) (apply-env (cadddr env) search-var))
       ((equal? (car env) 'extend-env-rec)
        (let ((pname (cadr env))
              (vars (caddr env))
@@ -144,6 +161,7 @@
       [(equal? exp-type 'print) (my-print (cadr exp) env)]
       [(equal? exp-type 'if) (if-exp exp env)]
       [(equal? exp-type 'call) (call-exp exp env)]
+      [(equal? exp-type 'global) (global-exp exp env)]
       [(equal? exp-type 'for) (for-exp exp env)]
       [(equal? exp-type 'proc) (def-exp exp env)]
       [(equal? exp-type 'list) (list env exp)]
@@ -155,16 +173,22 @@
       [(equal? exp-type 'true) (list env 'True)]
       [(equal? exp-type 'false) (list env 'False)]
       [(equal? exp-type 'return) (return-exp exp env)]
+      
       [else exp])))
 
 
 ;value of assign expression
 (define (assign exp env)
-  (let ((ref (new-ref (cadr (value-of (caddr exp) env)))))
-    (let ((var (cadr exp)))
-      (cons
-       (extend-env var ref env)
-       (list 'None)))))
+  (let ((var (cadr exp)))
+    (if (global? var env)
+        (let ((ref (apply-env env var)))
+          (begin
+             (setref ref (cadr (value-of (caddr exp) env)))
+             (list env 'None)))
+        (let ((ref (new-ref (cadr (value-of (caddr exp) env)))))
+          (cons
+           (extend-env var ref env)
+           (list 'None))))))
 
 
 ;print function 
@@ -280,6 +304,11 @@
 (define (return-exp exp env)
   (value-of (cadr exp) env))
 
+(define (global-exp exp env)
+  (list
+   (extend-global (cadr exp) env)
+   'None))
+
 ;gives the value of a variable
 (define (var exp env)
   (let ((val (deref (apply-env env (cadr exp) ))))
@@ -305,5 +334,6 @@
   (list 'num num))
 
 ;test
-;(define a "x=4; def g(y=1): return y;; def f(x=2, y=9): b = g(x); return b;; a = f(x); print(a);")
+;(define a "o=4; def g(): global o; o = o + 1; return 0;; def f(x=2, y=9): global o; o = o + 2; return o;; a = g() + f(3); print(a); print(o);")
+;(define b "a = 1; a=2; a=3; a=4;")
 ;(value-of-program a)
