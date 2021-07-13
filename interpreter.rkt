@@ -251,7 +251,7 @@
   (let ((pname (cadr (cadr exp)))
         (arg-values (get-arguments (caddr exp) env)))
     (let ((proc (apply-env env pname)))
-              (let ((refs (get-refs (find-params pname env) arg-values)))
+              (let ((refs (get-refs (find-params pname env) arg-values env)))
                 (apply-procedure (deref proc) refs)))))
 
 ;input: list of expressions
@@ -265,16 +265,16 @@
 ;input: env * list of values
 ;ouput: list of values
 
-(define (get-refs params arg-values)
+(define (get-refs params arg-values env)
     (if (empty? params)
         '()
         (if (empty? arg-values)
         (let ((id (cadr (car params)))
-          (val (cadr (value-of (caddr (car params))))))
-          (cons (new-ref val) (get-refs (cdr params) (cdr arg-values))))
+          (val (cadr (value-of (caddr (car params)) env))))
+          (cons (new-ref val) (get-refs (cdr params) arg-values env)))
         (let ((id (cadr (car params)))
               (val (car arg-values)))
-          (cons (new-ref val) (get-refs (cdr params) (cdr arg-values)))
+          (cons (new-ref val) (get-refs (cdr params) (cdr arg-values) env))
           ))))
 
 (define (return-exp exp env)
@@ -305,5 +305,5 @@
   (list 'num num))
 
 ;test
-(define a "x=4; def g(y=1): return y;; def f(x=2): b = g(x); return b;; a = f(); print(a);")
+(define a "x=4; def g(y=1): return y;; def f(x=2, y=9.3): b = g(x); return y;; a = f(2); print(a);")
 (value-of-program a)
