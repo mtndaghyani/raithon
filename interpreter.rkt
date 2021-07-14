@@ -164,18 +164,23 @@
       [(equal? exp-type 'global) (global-exp exp env)]
       [(equal? exp-type 'for) (for-exp exp env)]
       [(equal? exp-type 'proc) (def-exp exp env)]
-      [(equal? exp-type 'list) (list env exp)]
+      [(equal? exp-type 'list) (list-exp exp env)]
       [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
-      [(equal? exp-type 'true) (list env 'True)]
-      [(equal? exp-type 'false) (list env 'False)]
+      [(equal? exp-type 'true) (list env #t)]
+      [(equal? exp-type 'false) (list env #f)]
       [(equal? exp-type 'plus) (plus exp env)]
-      [(equal? exp-type 'true) (list env 'True)]
-      [(equal? exp-type 'false) (list env 'False)]
       [(equal? exp-type 'return) (return-exp exp env)]
+      [(equal? exp-type 'num) (list env (cadr exp))]
       
       [else exp])))
 
+;value of list-exp
+(define (list-exp exp env)
+  (let ((exps (cadr exp)))
+    (if (empty? exps)
+        (list env '())
+        (list env (cons (cadr (value-of (car exps) env)) (cadr (list-exp (list 'list (cdr exps)) env)))))))
 
 ;value of assign expression
 (define (assign exp env)
@@ -203,14 +208,14 @@
 
 ;extracts the printable content of an abstact syntax object
 (define (get-content exp env)
-  (let ((exp-type (car exp)))
+  (let ((val (cadr (value-of exp env))))
     (cond
-      [(equal? exp-type 'list) (print-list (cadr exp) env)]
-      [(equal? exp-type 'true) 'True]
-      [(equal? exp-type 'false) 'False]
-      [(equal? exp-type 'none) 'None]
-      [(equal? exp-type 'num) (cadr exp)]
-      [else (deref (apply-env env (cadr exp) ))])))
+      [(list? val)  (print-list val env)]
+      [(equal? val #t) 'True]
+      [(equal? val '#f) 'False]
+      [(equal? val 'None) 'None]
+      [(number? val) val]
+)))
   
 ;prints a list 
 (define (print-list list env) 
@@ -223,10 +228,10 @@
 (define (print-items list env)
   (if (= (length list) 1)
       (begin
-        (display (get-content (car list) env))
+        (display (car list))
         (display "]"))
       (begin
-        (display (get-content (car list) env))
+        (display (car list))
         (display ", ")
         (print-items (cdr list) env))))
       
@@ -235,19 +240,16 @@
 (define (if-exp exp env)
   (let ((e1 (value-of (cadr exp) env)))
     (cond
-      [(or (equal? (cadr e1) 'False) (equal? (cadr e1) null)) (value-of (cadddr exp) (car e1))]
-      [(equal? (cadr e1) 'True) (value-of (caddr exp) (car e1))])))
-
-
-
+      [(or (equal? (cadr e1) #f) (equal? (cadr e1) null)) (value-of (cadddr exp) (car e1))]
+      [(equal? (cadr e1) #t) (value-of (caddr exp) (car e1))])))
 
 
 ;for expression
 (define (for-exp exp env)
   (let ((var (cadr exp))
-        (py-list (cadr
+        (py-list 
                   (cadr
-                   (value-of (caddr exp) env))))
+                   (value-of (caddr exp) env)))
         (statements (cadddr exp)))
     (parsed-for-exp var py-list statements env)))
 
@@ -256,7 +258,7 @@
   (if (null? py-list)
       (list env 'None)
       (begin
-        (new-ref (cadr (value-of (car py-list) env)))
+        (new-ref (car py-list))
         (value-of statements (extend-env
                               var
                               (- (length the-store) 1)
@@ -301,9 +303,11 @@
           (cons (new-ref val) (get-refs (cdr params) (cdr arg-values) env))
           ))))
 
+;return statement
 (define (return-exp exp env)
-  (value-of (cadr exp) env))
+  (list env (cadr(value-of (cadr exp) env))))
 
+;global statement
 (define (global-exp exp env)
   (list
    (extend-global (cadr exp) env)
@@ -313,27 +317,23 @@
 (define (var exp env)
   (let ((val (deref (apply-env env (cadr exp) ))))
     (cond
-      [(number? val) (list 'num val)]
-      [(list? val) (list 'list val)]
-      [(equal? 'True val) (list env 'True)]    ;??????????????????????
-      [(equal? 'False val) (list env 'False)]  ;??????????????????????
-      [else (list 'None)])))
+      [(number? val) (list env val)]
+      [(list? val) (list env val)]
+      [(equal? #t val) (list env #t)]    
+      [(equal? #f val) (list env #f)]
+      [(equal? 'None val) (list env 'None)]
+      [else (list env 'None)])))
 
 ;adds two numbers together
 (define (plus exp env)
-  (let ((num1 (expval->num (value-of (cadr exp) env)))
-        (num2 (expval->num (value-of (caddr exp) env))))
-    (num-val (+ num1 num2))))
+  (let ((num1 (cadr (value-of (cadr exp) env)))
+        (num2 (cadr (value-of (caddr exp) env))))
+     (list env (+ num1 num2))))
 
-;provides value of number in racket form
-(define (expval->num exp)
-  (cadr exp))
 
-;provides number in python
-(define (num-val num)
-  (list 'num num))
+
 
 ;test
 ;(define a "def f(x=False): if x: return 0; else: return f(True);;; a = f(); print(a);")
-;(define b "a = 1; a=2; a=3; a=4;")
-;(value-of-program a)
+;(define b "for i in [1, 2, 3, 4 + 12, 5]: print(i);;")
+;(value-of-program b)
