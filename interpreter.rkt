@@ -2,20 +2,7 @@
 
 (require "parser.rkt")
 
-;functions relating to environment
-#|
-(define (empty-env) '())
 
-(define (extend-env var ref env)
-  (cons var (cons ref env)))
-
-(define (apply-env var env)
-  (if (equal? var (car env))
-      (cadr env)
-      (apply-env var (cddr env))))
-|#
-
-;another environment implementation
 (define empty-env
   (lambda () (list 'empty-env)))
 
@@ -334,6 +321,6 @@
 
 
 ;test
-;(define a "def f(x=False): if x: return 0; else: return f(True);;; a = f(); print(a);")
+;(define a "o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); print(a); print(o); print(y);")
 ;(define b "for i in [1, 2, 3, 4 + 12, 5]: print(i);;")
-;(value-of-program b)
+;(value-of-program a)
