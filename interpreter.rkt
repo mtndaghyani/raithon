@@ -159,6 +159,7 @@
       [(equal? exp-type 'plus) (plus exp env)]
       [(equal? exp-type 'return) (return-exp exp env)]
       [(equal? exp-type 'num) (list env (cadr exp))]
+      [(equal? exp-type 'pass) (list env 'None)]
       
       [else exp])))
 
@@ -321,6 +322,6 @@
 
 
 ;test
-;(define a "o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); print(a); print(o); print(y);")
+;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
 ;(define b "for i in [1, 2, 3, 4 + 12, 5]: print(i);;")
 ;(value-of-program a)
