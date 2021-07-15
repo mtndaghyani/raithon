@@ -153,6 +153,7 @@
       [(equal? exp-type 'for) (for-exp exp env)]
       [(equal? exp-type 'proc) (def-exp exp env)]
       [(equal? exp-type 'list) (list-exp exp env)]
+      [(equal? exp-type 'index) (index exp env)]
       [(equal? exp-type 'var) (var exp env)]
       [(equal? exp-type 'none) (list env 'None)]
       [(equal? exp-type 'true) (list env #t)]
@@ -174,6 +175,12 @@
     (if (empty? exps)
         (list env '())
         (list env (cons (cadr (value-of (car exps) env)) (cadr (list-exp (list 'list (cdr exps)) env)))))))
+
+;value of index expression
+(define (index exp env)
+  (let ((lst (cadr (value-of (cadr exp) env)))
+        (index (cadr (value-of (caddr exp) env))))
+    (list env (list-ref lst index))))
 
 ;value of assign expression
 (define (assign exp env)
@@ -357,5 +364,5 @@
     (list env (expt val1 val2))))
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "a = False; b = [1, 2]; c = a * b; print(c);")
+;(define b "a = 9; b = [a, 2]; x= 0;  y = 0; c = b[x * y + 0]; print(c);")
 ;(value-of-program b)
