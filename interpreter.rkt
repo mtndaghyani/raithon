@@ -120,8 +120,10 @@
 
 ;value-of function
 (define (value-of-program pgm)
-  (initialize-store!)
-  (value-of (parse pgm) (empty-env)))
+  (begin
+    (initialize-store!)
+    (value-of (parse pgm) (empty-env))
+    'end-of-program))
 
 (define (value-of exp env)
   (cond
@@ -394,14 +396,16 @@
     (list env (compare-list cmp env))))
 
 (define (compare-list exp env)
-  (let ((num1 (value-of (cadr (caadr exp)) env))
+  (let ((num1 (cadr (value-of (car exp) env)))
         (operation (caaadr exp))
-        (num2 (value-of (cadr (caadr exp)) env)))
-    (if (null? (cdadr exp))
-      (value-of (list operation num1 num2) env)
-      (and
-       (value-of (list operation num1 num2) env)
-       (compare-list (list (list 'num num2) (cdadr exp))))))) 
+        (num2 (cadr (value-of (cadr (caadr exp)) env))))
+    (let ((single-operation
+           (list operation (list 'num num1) (list 'num num2))))
+      (if (null? (cdadr exp))
+          (value-of single-operation env)
+          (and
+           (value-of single-operation env)
+           (compare-list (list (list 'num num2) (cdadr exp)) env)))))) 
 
 (define (less exp env)
   (let ((num1 (cadr (value-of (cadr exp) env)))
