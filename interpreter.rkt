@@ -161,6 +161,7 @@
       [(equal? exp-type 'minus) (minus exp env)]
       [(equal? exp-type 'star) (star exp env)]
       [(equal? exp-type 'slash) (slash exp env)]
+      [(equal? exp-type 'doublestar) (doublestar exp env)]
       [(equal? exp-type 'return) (return-exp exp env)]
       [(equal? exp-type 'num) (list env (cadr exp))]
       [(equal? exp-type 'pass) (list env 'None)]
@@ -344,7 +345,12 @@
         (val2 (cadr (value-of (caddr exp) env))))
     (list env (/ val1 (exact->inexact val2)))))
 
+;power
+(define (doublestar exp env)
+  (let ((val1 (cadr (value-of (cadr exp) env)))
+        (val2 (cadr (value-of (caddr exp) env))))
+    (list env (expt val1 val2))))
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "a = True; b = True; c = a * b; print(c);")
+;(define b "a = 2; b = 3; c = a ** b + a * b - 2 / 5 * 3; print(c);")
 ;(value-of-program b)
