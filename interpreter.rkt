@@ -313,11 +313,14 @@
       [(equal? 'None val) (list env 'None)]
       [else (list env 'None)])))
 
-;adds two numbers together
+;Add, OR, Concat
 (define (plus exp env)
-  (let ((num1 (cadr (value-of (cadr exp) env)))
-        (num2 (cadr (value-of (caddr exp) env))))
-     (list env (+ num1 num2))))
+  (let ((val1 (cadr (value-of (cadr exp) env)))
+        (val2 (cadr (value-of (caddr exp) env))))
+    (cond
+      [(and (number? val1) (number? val2)) (+ val1 val2)]
+      [(and (list? val1) (list? val2)) (append val1 val2)]
+      [(and (boolean? val1) (boolean? val2)) (or val1 val2)])))
 
 
 
