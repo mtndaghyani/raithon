@@ -422,8 +422,3 @@
         (num2 (cadr (value-of (caddr exp) env))))
     (> num1 num2)))
 
-;test
-;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "a = 9; b = [a, 2]; x= 0;  y = 0; c = b[x * y + 0]; print(c);")
-;(define c "a = True or False; b = True; c = a and not b; print(a); print(b); print(c);")
-;(value-of-program c)
