@@ -334,11 +334,16 @@
 
 ;Multiplication, AND
 (define (star exp env)
-  (let ((val1 (cadr (value-of (cadr exp) env)))
-        (val2 (cadr (value-of (caddr exp) env))))
+  (let ((val1 (cadr (value-of (cadr exp) env))))
     (cond
-      [(and (number? val1) (number? val2)) (list env (* val1 val2))]
-      [(and (boolean? val1) (boolean? val2)) (list env (and val1 val2))])))
+      [(and (number? val1) (zero? val1)) (list env 0)]
+      [(and (boolean? val1) (false? val1)) (list env #f)]
+      [else
+       (let ((val2 (cadr (value-of (caddr exp) env))))
+         (cond
+           [(and (number? val1) (number? val2)) (list env (* val1 val2))]
+           [(and (boolean? val1) (boolean? val2)) (list env (and val1 val2))]))])))
+
 ;devision
 (define (slash exp env)
   (let ((val1 (cadr (value-of (cadr exp) env)))
@@ -352,5 +357,5 @@
     (list env (expt val1 val2))))
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "a = 2; b = 3; c = a ** b + a * b - 2 / 5 * 3; print(c);")
+;(define b "a = False; b = [1, 2]; c = a * b; print(c);")
 ;(value-of-program b)
