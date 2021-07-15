@@ -2,6 +2,7 @@
 
 (require "parser.rkt")
 
+(provide value-of-program)
 
 (define empty-env
   (lambda () (list 'empty-env)))
