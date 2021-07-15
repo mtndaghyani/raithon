@@ -158,6 +158,9 @@
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
       [(equal? exp-type 'plus) (plus exp env)]
+      [(equal? exp-type 'minus) (minus exp env)]
+      [(equal? exp-type 'star) (star exp env)]
+      [(equal? exp-type 'slash) (slash exp env)]
       [(equal? exp-type 'return) (return-exp exp env)]
       [(equal? exp-type 'num) (list env (cadr exp))]
       [(equal? exp-type 'pass) (list env 'None)]
@@ -322,10 +325,26 @@
       [(and (list? val1) (list? val2)) (list env (append val1 val2))]
       [(and (boolean? val1) (boolean? val2)) (list env (or val1 val2))])))
 
+; minus exp
+(define (minus exp env)
+  (let ((val1 (cadr (value-of (cadr exp) env)))
+        (val2 (cadr (value-of (caddr exp) env))))
+    (list env (- val1 val2))))
 
-
+;Multiplication, AND
+(define (star exp env)
+  (let ((val1 (cadr (value-of (cadr exp) env)))
+        (val2 (cadr (value-of (caddr exp) env))))
+    (cond
+      [(and (number? val1) (number? val2)) (list env (* val1 val2))]
+      [(and (boolean? val1) (boolean? val2)) (list env (and val1 val2))])))
+;devision
+(define (slash exp env)
+  (let ((val1 (cadr (value-of (cadr exp) env)))
+        (val2 (cadr (value-of (caddr exp) env))))
+    (list env (/ val1 (exact->inexact val2)))))
 
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "a = [1, 2]; b = [3, 4]; c = a + b; print(c);")
+;(define b "a = True; b = True; c = a * b; print(c);")
 ;(value-of-program b)
