@@ -318,14 +318,14 @@
   (let ((val1 (cadr (value-of (cadr exp) env)))
         (val2 (cadr (value-of (caddr exp) env))))
     (cond
-      [(and (number? val1) (number? val2)) (+ val1 val2)]
-      [(and (list? val1) (list? val2)) (append val1 val2)]
-      [(and (boolean? val1) (boolean? val2)) (or val1 val2)])))
+      [(and (number? val1) (number? val2)) (list env (+ val1 val2))]
+      [(and (list? val1) (list? val2)) (list env (append val1 val2))]
+      [(and (boolean? val1) (boolean? val2)) (list env (or val1 val2))])))
 
 
 
 
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
-;(define b "for i in [1, 2, 3, 4 + 12, 5]: print(i);;")
-;(value-of-program a)
+;(define b "a = [1, 2]; b = [3, 4]; c = a + b; print(c);")
+;(value-of-program b)
