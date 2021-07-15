@@ -158,6 +158,9 @@
       [(equal? exp-type 'none) (list env 'None)]
       [(equal? exp-type 'true) (list env #t)]
       [(equal? exp-type 'false) (list env #f)]
+      [(equal? exp-type 'and) (and-exp exp env)]
+      [(equal? exp-type 'or) (or-exp exp env)]
+      [(equal? exp-type 'not) (not-exp exp env)]
       [(equal? exp-type 'plus) (plus exp env)]
       [(equal? exp-type 'minus) (minus exp env)]
       [(equal? exp-type 'star) (star exp env)]
@@ -324,6 +327,23 @@
       [(equal? 'None val) (list env 'None)]
       [else (list env 'None)])))
 
+;value-of and exp
+(define (and-exp exp env)
+  (let ((e1 (cadr (value-of (cadr exp) env)))
+        (e2 (cadr (value-of (caddr exp) env))))
+    (list env (and e1 e2))))
+
+;value-of or-exp
+(define (or-exp exp env)
+  (let ((e1 (cadr (value-of (cadr exp) env)))
+        (e2 (cadr (value-of (caddr exp) env))))
+    (list env (or e1 e2))))
+
+;value-of not exp
+(define (not-exp exp env)
+  (let ((e1 (cadr (value-of (cadr exp) env))))
+    (list env (not e1))))
+
 ;Add, OR, Concat
 (define (plus exp env)
   (let ((val1 (cadr (value-of (cadr exp) env)))
@@ -365,4 +385,5 @@
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
 ;(define b "a = 9; b = [a, 2]; x= 0;  y = 0; c = b[x * y + 0]; print(c);")
-;(value-of-program b)
+;(define c "a = True or False; b = True; c = a and not b; print(a); print(b); print(c);")
+;(value-of-program c)
