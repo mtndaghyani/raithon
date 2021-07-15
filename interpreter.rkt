@@ -391,26 +391,32 @@
 ;value-of a compare expression
 (define (compare exp env)
   (let ((cmp (cdr exp)))
-    (compare-list exp env)))
+    (list env (compare-list cmp env))))
 
 (define (compare-list exp env)
-  (let ((num1 (value-of (car exp) env))
+  (let ((num1 (value-of (cadr (caadr exp)) env))
         (operation (caaadr exp))
         (num2 (value-of (cadr (caadr exp)) env)))
     (if (null? (cdadr exp))
       (value-of (list operation num1 num2) env)
       (and
-       (value-of (list operation num1 num2))
+       (value-of (list operation num1 num2) env)
        (compare-list (list (list 'num num2) (cdadr exp))))))) 
 
 (define (less exp env)
-  exp)
+  (let ((num1 (cadr (value-of (cadr exp) env)))
+        (num2 (cadr (value-of (caddr exp) env))))
+    (< num1 num2)))
 
 (define (equal exp env)
-  exp)
+  (let ((num1 (cadr (value-of (cadr exp) env)))
+        (num2 (cadr (value-of (caddr exp) env))))
+    (= num1 num2)))
 
 (define (more exp env)
-  exp)
+  (let ((num1 (cadr (value-of (cadr exp) env)))
+        (num2 (cadr (value-of (caddr exp) env))))
+    (> num1 num2)))
 
 ;test
 ;(define a "def g(): pass;; o = 8; def f(x=0): global o; for i in [1, 2, 3]: o = o + i;; x = x + 10; return x;; y = 99; a = f(y); b = g(); print(a); print(o); print(y);")
