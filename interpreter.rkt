@@ -315,7 +315,9 @@
 
 ;return statement
 (define (return-exp exp env)
-  (list env (cadr(value-of (cadr exp) env))))
+  (if (empty? (cdr exp))
+              (list env 'None)
+              (list env (cadr(value-of (cadr exp) env)))))
 
 ;global statement
 (define (global-exp exp env)
